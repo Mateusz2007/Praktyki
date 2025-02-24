@@ -1,0 +1,14 @@
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\bin\Debug\net7.0\Zadanie2.exe
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\bin\Debug\net7.0\Zadanie2.deps.json
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\bin\Debug\net7.0\Zadanie2.runtimeconfig.json
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\bin\Debug\net7.0\Zadanie2.dll
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\bin\Debug\net7.0\Zadanie2.pdb
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\obj\Debug\net7.0\Zadanie2.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\obj\Debug\net7.0\Zadanie2.AssemblyInfoInputs.cache
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\obj\Debug\net7.0\Zadanie2.AssemblyInfo.cs
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\obj\Debug\net7.0\Zadanie2.csproj.CoreCompileInputs.cache
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\obj\Debug\net7.0\Zadanie2.dll
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\obj\Debug\net7.0\refint\Zadanie2.dll
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\obj\Debug\net7.0\Zadanie2.pdb
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\obj\Debug\net7.0\Zadanie2.genruntimeconfig.cache
+C:\Users\kozik\Desktop\Praktyki\Zadanie2\Zadanie2\obj\Debug\net7.0\ref\Zadanie2.dll
