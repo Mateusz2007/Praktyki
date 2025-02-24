@@ -1,0 +1,397 @@
+/*
+//https://a.allegroimg.allegrosandbox.pl/original/1127bb/4e4fca29413f8222ea7022608b2e - motyl
+//https://a.allegroimg.allegrosandbox.pl/original/117a2c/7ebadaf34ab7b41cfc4cb26efc92 - dywan niebieski
+//https://a.allegroimg.allegrosandbox.pl/original/11a247/8b416aa645f8be4187462edab993 - rakieta
+//https://a.allegroimg.allegrosandbox.pl/original/11b60b/d70b778447b3904def553a1cf5f0 - dywan szary
+--https://a.allegroimg.allegrosandbox.pl/original/11f96a/d074671a460982fde7448c8464ae
+//https://a.allegroimg.allegrosandbox.pl/original/11962e/7e74901446b8a001ca372d98d790 - ksi¹¿ka
+
+//jpGXCVy2zxUEHmA9
+*/
+
+using System;
+using System.ComponentModel;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Security.Cryptography;
+
+internal class Program
+{
+    public static List<string> lista_zdjec = new List<string>() { };
+
+    static async Task Main(string[] args)
+    {
+        string clientId = "d00446664cde499f88dbb0e745a73767";
+        string clientSecret = "OsZY4GpyIv8qidkXR7GFNvTsFXdTQl6DKaF39ZytvWCxP07RNspUUB24oQBJYxn5";
+        string redirectUri = "https://oauth.pstmn.io/v1/callback";
+
+        string tokenUrl = "https://allegro.pl.allegrosandbox.pl/auth/oauth/token";
+        string apiUrl = "https://api.allegro.pl.allegrosandbox.pl/sale/offers";
+
+        Console.WriteLine($"https://allegro.pl.allegrosandbox.pl/auth/oauth/authorize?response_type=code&client_id={clientId}&redirect_uri={redirectUri}");
+
+        Console.Write("\nKod: ");
+        string authorizationCode = Console.ReadLine();
+
+        string accessToken = await GetUserAccessToken(clientId, clientSecret, tokenUrl, authorizationCode, redirectUri);
+
+        if (!string.IsNullOrEmpty(accessToken))
+        {
+            await GetOffers(accessToken, apiUrl);
+        }
+
+        foreach (string elem in lista_zdjec)
+        {
+            Console.WriteLine(elem);
+        }
+
+        await ReplaceOfferImage(accessToken, "7777191788", "https://a.allegroimg.allegrosandbox.pl/original/117a2c/7ebadaf34ab7b41cfc4cb26efc92", "https://a.allegroimg.allegrosandbox.pl/original/11a247/8b416aa645f8be4187462edab993");
+
+        /*
+        //Wgranie pliku na serwer
+        string imagePath = "C:\\temp\\image37.png";
+        string uploadedImageUrl = await UploadImageToAllegro(accessToken, imagePath);
+
+        if (!string.IsNullOrEmpty(uploadedImageUrl))
+        {
+            Console.WriteLine($"Przes³any obraz dostêpny pod adresem: {uploadedImageUrl}");
+        }
+        */
+    }
+
+    static async Task<string> GetUserAccessToken(string clientId, string clientSecret, string tokenUrl, string authorizationCode, string redirectUri)
+    {
+        using (var client = new HttpClient())
+        {
+            var authHeader = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authHeader);
+
+            var content = new StringContent($"grant_type=authorization_code&code={authorizationCode}&redirect_uri={redirectUri}",
+                Encoding.UTF8, "application/x-www-form-urlencoded");
+
+            var response = await client.PostAsync(tokenUrl, content);
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"B³¹d pobierania tokena u¿ytkownika: {response.StatusCode}");
+                Console.WriteLine($"Treœæ odpowiedzi: {responseString}");
+                return null;
+            }
+
+            var tokenJson = JObject.Parse(responseString);
+            string accessToken = tokenJson["access_token"].ToString();
+
+            return accessToken;
+        }
+    }
+
+    static async Task GetOffers(string accessToken, string apiUrl)
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.allegro.public.v1+json"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            client.DefaultRequestHeaders.Add("Accept-Language", "pl-PL");
+
+            HttpResponseMessage response = await client.GetAsync(apiUrl);
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"B³¹d przy pobieraniu ofert: {response.StatusCode}");
+                Console.WriteLine($"Tekst odpowiedzi: {responseString}");
+                return;
+            }
+
+            JObject jsonResponse = JObject.Parse(responseString);
+
+            if (jsonResponse.ContainsKey("offers"))
+            {
+                JArray offers = (JArray)jsonResponse["offers"];
+                if (offers.Count == 0)
+                {
+                    Console.WriteLine("Brak ofert do pobrania.");
+                    return;
+                }
+
+                foreach (var offer in offers)
+                {
+                    string offerId = offer["id"].ToString();
+                    Program.lista_zdjec.Add(offerId);
+                    string offerDetailsUrl = $"https://api.allegro.pl.allegrosandbox.pl/sale/product-offers/{offerId}";
+                    await GetOfferDetailsAndImages(client, offerDetailsUrl);
+                }
+            }
+            else
+            {
+                Console.WriteLine("OdpowiedŸ nie zawiera klucza 'offers'.");
+            }
+        }
+    }
+
+    static async Task GetOfferDetailsAndImages(HttpClient client, string offerDetailsUrl)
+    {
+        HttpResponseMessage response = await client.GetAsync(offerDetailsUrl);
+        string responseString = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"B³¹d przy pobieraniu szczegó³ów oferty: {response.StatusCode}");
+            Console.WriteLine($"Tekst odpowiedzi: {responseString}");
+            return;
+        }
+
+        JObject jsonResponse = JObject.Parse(responseString);
+
+        if (jsonResponse.ContainsKey("images"))
+        {
+            JArray images = (JArray)jsonResponse["images"];
+            foreach (var image in images)
+            {
+                Program.lista_zdjec.Add(image.ToString());
+            }
+        }
+        else
+        {
+            Console.WriteLine("Brak zdjêæ w ofercie.");
+        }
+    }
+
+    static string GetFileHash(string filePath)
+    {
+        using (var md5 = MD5.Create())
+        {
+            using (var stream = File.OpenRead(filePath))
+            {
+                byte[] hashBytes = md5.ComputeHash(stream);
+                return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+            }
+        }
+    }
+
+    static async Task<string> UploadImageToAllegro(string accessToken, string imagePath)
+    {
+        string hash_path = @"lista_hash.txt";
+        if (!File.Exists(hash_path))
+        {
+            Console.WriteLine("Plik lista_hash.txt nie istnieje.");
+            return null;
+        }
+
+        string[] lines = File.ReadAllLines(hash_path);
+        string hash_content = File.ReadAllText(hash_path);
+
+        using (HttpClient client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.allegro.public.v1+json"));
+            client.DefaultRequestHeaders.Add("Accept-Language", "pl-PL");
+
+            string apiUrl = "https://upload.allegro.pl.allegrosandbox.pl/sale/images";
+
+            if (!File.Exists(imagePath))
+            {
+                Console.WriteLine($"Plik {imagePath} nie istnieje.");
+                return null;
+            }
+
+            string file_upload_hash = GetFileHash(imagePath);
+
+            foreach (string ln in lines)
+            {
+                if (ln == file_upload_hash)
+                {
+                    Console.WriteLine("Plik jest ju¿ na serwerze");
+                    return null;
+                }
+            }
+
+            hash_content += $"\n{file_upload_hash}";
+            File.WriteAllText(hash_path, hash_content);
+
+            byte[] imageBytes = await File.ReadAllBytesAsync(imagePath);
+            ByteArrayContent byteContent = new ByteArrayContent(imageBytes);
+            byteContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+
+            HttpResponseMessage response = await client.PostAsync(apiUrl, byteContent);
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"B³¹d podczas przesy³ania obrazu: {response.StatusCode}");
+                return null;
+            }
+
+            JObject jsonResponse = JObject.Parse(responseString);
+            string imageUrl = jsonResponse["location"]?.ToString();
+
+            return imageUrl;
+        }
+    }
+
+    static async Task<string> ReplaceOfferImage(string accessToken, string offerId, string oldImageUrl, string newImagePath)
+    {
+        // Pobierz szczegó³y oferty
+        string offerDetailsUrl = $"https://api.allegro.pl.allegrosandbox.pl/sale/product-offers/{offerId}";
+        JObject offerDetails = await GetOfferDetails(accessToken, offerDetailsUrl);
+
+        if (offerDetails == null || !offerDetails.ContainsKey("images"))
+        {
+            Console.WriteLine("Brak zdjêæ w ofercie.");
+            return null;
+        }
+
+        // Zak³adamy, ¿e "images" to tablica stringów (URL)
+        JArray imagesArray = (JArray)offerDetails["images"];
+        List<string> imageList = imagesArray.ToObject<List<string>>();
+
+        // ZnajdŸ indeks starego zdjêcia (porównanie URL-ów)
+        int index = imageList.FindIndex(url => string.Equals(url, oldImageUrl, StringComparison.OrdinalIgnoreCase));
+        if (index < 0)
+        {
+            Console.WriteLine("Nie znaleziono starego zdjêcia w ofercie.");
+            return null;
+        }
+
+        // Usuñ stare zdjêcie
+        imageList.RemoveAt(index);
+
+        // Przeœlij nowy obraz, aby uzyskaæ jego URL
+        string newImageUrl = await UploadImageToAllegro(accessToken, newImagePath);
+        if (string.IsNullOrEmpty(newImageUrl))
+        {
+            Console.WriteLine("B³¹d podczas przesy³ania nowego zdjêcia.");
+            return null;
+        }
+
+        // Wstaw nowy URL w miejsce usuniêtego (lub mo¿na te¿ dopisaæ na koñcu)
+        imageList.Insert(index, newImageUrl);
+
+        // Zaktualizuj ofertê z now¹ list¹ zdjêæ
+        bool updateSuccess = await UpdateOfferImages(accessToken, offerId, imageList);
+        if (updateSuccess)
+        {
+            Console.WriteLine("Oferta zosta³a zaktualizowana z nowym zdjêciem.");
+            return newImageUrl;
+        }
+        else
+        {
+            Console.WriteLine("B³¹d podczas aktualizacji oferty.");
+            return null;
+        }
+    }
+
+    static async Task<bool> UpdateOfferImages(string accessToken, string offerId, List<string> images)
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.allegro.public.v1+json"));
+            client.DefaultRequestHeaders.Add("Accept-Language", "pl-PL");
+
+            string apiUrl = $"https://api.allegro.pl.allegrosandbox.pl/sale/product-offers/{offerId}";
+
+            // Buduje tablicê JSON ze zdjêciami – API oczekuje tablicy URLi
+            JArray imagesArray = new JArray();
+            foreach (var url in images)
+            {
+                imagesArray.Add(url);
+            }
+            JObject updateData = new JObject
+            {
+                ["images"] = imagesArray
+            };
+
+            var content = new StringContent(updateData.ToString(), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.PutAsync(apiUrl, content);
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"B³¹d podczas aktualizacji oferty: {response.StatusCode}");
+                string resp = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Treœæ odpowiedzi: {resp}");
+                return false;
+            }
+            return true;
+        }
+    }
+
+    static async Task<JObject> GetOfferDetails(string accessToken, string offerDetailsUrl)
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.allegro.public.v1+json"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            client.DefaultRequestHeaders.Add("Accept-Language", "pl-PL");
+
+            HttpResponseMessage response = await client.GetAsync(offerDetailsUrl);
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"B³¹d podczas pobierania szczegó³ów oferty: {response.StatusCode}");
+                Console.WriteLine($"Treœæ odpowiedzi: {responseString}");
+                return null;
+            }
+
+            JObject jsonResponse = JObject.Parse(responseString);
+            return jsonResponse;
+        }
+    }
+
+    static async Task<bool> DeleteImageFromOffer(string accessToken, string offerId, string imageId)
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.allegro.public.v1+json"));
+            client.DefaultRequestHeaders.Add("Accept-Language", "pl-PL");
+
+            string apiUrl = $"https://api.allegro.pl.allegrosandbox.pl/sale/product-offers/{offerId}/images/{imageId}";
+            HttpResponseMessage response = await client.DeleteAsync(apiUrl);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"B³¹d podczas usuwania zdjêcia: {response.StatusCode}");
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    static async Task<bool> UpdateOfferWithNewImage(string accessToken, string offerId, string newImageUrl)
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.allegro.public.v1+json"));
+            client.DefaultRequestHeaders.Add("Accept-Language", "pl-PL");
+
+            string apiUrl = $"https://api.allegro.pl.allegrosandbox.pl/sale/product-offers/{offerId}";
+
+            var updateData = new JObject
+            {
+                ["images"] = new JArray
+                {
+                    new JObject { newImageUrl }
+                }
+            };
+
+            var content = new StringContent(updateData.ToString(), Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PutAsync(apiUrl, content);
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"B³¹d podczas aktualizacji oferty: {response.StatusCode}");
+                return false;
+            }
+
+            return true;
+        }
+    }
+}
