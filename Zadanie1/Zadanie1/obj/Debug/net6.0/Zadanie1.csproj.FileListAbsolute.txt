@@ -1,0 +1,14 @@
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\bin\Debug\net6.0\Zadanie1.exe
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\bin\Debug\net6.0\Zadanie1.deps.json
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\bin\Debug\net6.0\Zadanie1.runtimeconfig.json
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\bin\Debug\net6.0\Zadanie1.dll
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\bin\Debug\net6.0\Zadanie1.pdb
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\obj\Debug\net6.0\Zadanie1.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\obj\Debug\net6.0\Zadanie1.AssemblyInfoInputs.cache
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\obj\Debug\net6.0\Zadanie1.AssemblyInfo.cs
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\obj\Debug\net6.0\Zadanie1.csproj.CoreCompileInputs.cache
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\obj\Debug\net6.0\Zadanie1.dll
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\obj\Debug\net6.0\refint\Zadanie1.dll
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\obj\Debug\net6.0\Zadanie1.pdb
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\obj\Debug\net6.0\Zadanie1.genruntimeconfig.cache
+C:\Users\kozik\Desktop\Praktyki\Zadanie1\Zadanie1\obj\Debug\net6.0\ref\Zadanie1.dll
