@@ -1,4 +1,3 @@
-/*
 //https://a.allegroimg.allegrosandbox.pl/original/1127bb/4e4fca29413f8222ea7022608b2e - motyl
 //https://a.allegroimg.allegrosandbox.pl/original/117a2c/7ebadaf34ab7b41cfc4cb26efc92 - dywan niebieski
 //https://a.allegroimg.allegrosandbox.pl/original/11a247/8b416aa645f8be4187462edab993 - rakieta
@@ -7,7 +6,6 @@
 //https://a.allegroimg.allegrosandbox.pl/original/11962e/7e74901446b8a001ca372d98d790 - ksi¹¿ka
 
 //jpGXCVy2zxUEHmA9
-*/
 
 https://a.allegroimg.allegrosandbox.pl/original/11f32f/529966d34d8a83b7034b65d250c2 - opona
 https://a.allegroimg.allegrosandbox.pl/original/11a8c1/0484811a4a76986a1538674897fd - rakieta
@@ -18,45 +16,6 @@ https://a.allegroimg.allegrosandbox.pl/original/1127bb/4e4fca29413f8222ea7022608
 https://a.allegroimg.allegrosandbox.pl/original/11962e/7e74901446b8a001ca372d98d790 - ksi¹¿ka kolorowa
 - rakieta
 
-
-
-
-/*
-string oldImg = "";
-string newImg = "";
-
-Console.Write("\nPodaj stare zdjêcie: ");
-oldImg = Console.ReadLine();
-while (oldImg == "")
-{
-    Console.WriteLine("To pole nie mo¿e byæ puste!");
-    Console.Write("\nPodaj stare zdjêcie: ");
-    oldImg = Console.ReadLine();
-}
-
-Console.Write("\nPodaj nowe zdjêcie: ");
-newImg = Console.ReadLine();
-while (newImg == "")
-{
-    Console.WriteLine("To pole nie mo¿e byæ puste!");
-    Console.Write("\nPodaj stare zdjêcie: ");
-    newImg = Console.ReadLine();
-}
-
-Console.Write("Podaj numer oferty (Pozostaw to pole puste jeœli chcesz zamieniæ we wszystkich ofertach): ");
-string nrOferty = Console.ReadLine();
-
-if(nrOferty == "")
-{
-    await UpdateOfferImage(accessToken, oldImg, newImg);
-}
-else
-{
-    await UpdateOfferImage(nrOferty, accessToken, oldImg, newImg);
-}
-*/
-
-
 /*
 //Wgranie pliku na serwer
 string imagePath = "C:\\temp\\image37.png";
@@ -65,6 +24,66 @@ string uploadedImageUrl = await UploadImageToAllegro(accessToken, imagePath);
 if (!string.IsNullOrEmpty(uploadedImageUrl))
 {
     Console.WriteLine($"Przes³any obraz dostêpny pod adresem: {uploadedImageUrl}");
+}
+
+static async Task<string> UploadImageToAllegro(string accessToken, string imagePath)
+{
+    string hash_path = @"lista_hash.txt";
+    if (!File.Exists(hash_path))
+    {
+        Console.WriteLine("Plik lista_hash.txt nie istnieje.");
+        return null;
+    }
+
+    string[] lines = File.ReadAllLines(hash_path);
+    string hash_content = File.ReadAllText(hash_path);
+
+    using (HttpClient client = new HttpClient())
+    {
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.allegro.public.v1+json"));
+        client.DefaultRequestHeaders.Add("Accept-Language", "pl-PL");
+
+        string apiUrl = "https://upload.allegro.pl.allegrosandbox.pl/sale/images";
+
+        if (!File.Exists(imagePath))
+        {
+            Console.WriteLine($"Plik {imagePath} nie istnieje.");
+            return null;
+        }
+
+        string file_upload_hash = GetFileHash(imagePath);
+
+        foreach (string ln in lines)
+        {
+            if (ln == file_upload_hash)
+            {
+                Console.WriteLine("Plik jest ju¿ na serwerze");
+                return null;
+            }
+        }
+
+        hash_content += $"\n{file_upload_hash}";
+        File.WriteAllText(hash_path, hash_content);
+
+        byte[] imageBytes = await File.ReadAllBytesAsync(imagePath);
+        ByteArrayContent byteContent = new ByteArrayContent(imageBytes);
+        byteContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+
+        HttpResponseMessage response = await client.PostAsync(apiUrl, byteContent);
+        string responseString = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"B³¹d podczas przesy³ania obrazu: {response.StatusCode}");
+            return null;
+        }
+
+        JObject jsonResponse = JObject.Parse(responseString);
+        string imageUrl = jsonResponse["location"]?.ToString();
+
+        return imageUrl;
+    }
 }
 */
 
@@ -81,7 +100,6 @@ using System.Security.Cryptography;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Net;
-
 internal class Program
 {
     public static List<string> lista_zdjec = new List<string>() { };
@@ -114,8 +132,38 @@ internal class Program
         }
 
         WypiszZdjecia();
-        //await UpdateOfferImage(accessToken, "https://a.allegroimg.allegrosandbox.pl/original/118ed6/4bb095ba4a348efb81dd4f5c3116", "https://a.allegroimg.allegrosandbox.pl/original/11a8c1/0484811a4a76986a1538674897fd");
-        //await UpdateOfferImage(accessToken, "https://a.allegroimg.allegrosandbox.pl/original/11a8c1/0484811a4a76986a1538674897fd", "https://a.allegroimg.allegrosandbox.pl/original/118ed6/4bb095ba4a348efb81dd4f5c3116");
+
+        /*
+        string oldImg = "";
+        string newImg = "";
+
+        Console.Write("\nPodaj stare zdjêcie: ");
+        oldImg = Console.ReadLine();
+        while (oldImg == "")
+        {
+            Console.WriteLine("To pole nie mo¿e byæ puste!");
+            Console.Write("\nPodaj stare zdjêcie: ");
+            oldImg = Console.ReadLine();
+        }
+
+        Console.Write("\nPodaj œcie¿kê do nowego zdjêcia: ");
+        newImg = Console.ReadLine();
+        while (newImg == "")
+        {
+            Console.WriteLine("To pole nie mo¿e byæ puste!");
+            Console.Write("\nPodaj stare zdjêcie: ");
+            newImg = Console.ReadLine();
+        }
+
+        string uploadedImageUrl = await UploadImageToAllegro(accessToken, newImg);
+
+        if (!string.IsNullOrEmpty(uploadedImageUrl))
+        {
+            Console.WriteLine($"Przes³any obraz dostêpny pod adresem: {uploadedImageUrl}");
+        }
+
+        await UpdateOfferImage(accessToken, oldImg, uploadedImageUrl);
+        */
     }
 
     private static async Task<string> GetAuthorizationCode()
@@ -130,11 +178,47 @@ internal class Program
 
         string responseString = @"
             <html>
+                <head>
+                    <meta charset=""UTF-8"">
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background-color: #f4f7f6;
+                            margin: 0;
+                            padding: 0;
+                            height: 100vh;
+                            text-align: center;
+                        }
+                        .container {
+                            background-color: #ffffff;
+                            padding: 30px;
+                            border-radius: 8px;
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                            max-width: 400px;
+                            width: 100%;
+                            margin-top: 50px; 
+                            margin-left: auto;
+                            margin-right: auto;
+                        }
+                        h1 {
+                            color: #4CAF50;
+                            font-size: 24px;
+                        }
+                        p {
+                            font-size: 16px;
+                            color: #555;
+                            margin-top: 10px;
+                        }
+                    </style>
+                </head>
                 <body>
-                    <h1>Authorization successful. You can close this window.</h1>
-                    <script>
-                        //setTimeout(() => { window.close(); }, 0);
-                    </script>
+                    <div class=""container"">
+                        <h1>Autoryzacja pomyœlnie zrealizowana!</h1>
+                        <p>Teraz mo¿esz zamkn¹æ to okno!</p>
+                        <script>
+                            //setTimeout(() => { window.close(); }, 0);
+                        </script>
+                    </div>
                 </body>
             </html>";
 
@@ -147,7 +231,7 @@ internal class Program
 
         return code;
     }
-    static void WypiszZdjecia()
+    static async void WypiszZdjecia()
     {
         foreach (string elem in lista_zdjec)
         {
@@ -215,7 +299,7 @@ internal class Program
                 {
                     string offerId = offer["id"].ToString();
                     lista_ofert.Add(offerId);
-                    Program.lista_zdjec.Add(offerId);
+                    lista_zdjec.Add(offerId);
                     string offerDetailsUrl = $"https://api.allegro.pl.allegrosandbox.pl/sale/product-offers/{offerId}";
                     await GetOfferDetailsAndImages(client, offerDetailsUrl);
                 }
@@ -269,15 +353,13 @@ internal class Program
 
     static async Task<string> UploadImageToAllegro(string accessToken, string imagePath)
     {
-        string hash_path = @"lista_hash.txt";
-        if (!File.Exists(hash_path))
+        if (!File.Exists(imagePath))
         {
-            Console.WriteLine("Plik lista_hash.txt nie istnieje.");
+            Console.WriteLine($"Plik {imagePath} nie istnieje.");
             return null;
         }
 
-        string[] lines = File.ReadAllLines(hash_path);
-        string hash_content = File.ReadAllText(hash_path);
+        string apiUrl = "https://upload.allegro.pl.allegrosandbox.pl/sale/images";
 
         using (HttpClient client = new HttpClient())
         {
@@ -285,31 +367,23 @@ internal class Program
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.allegro.public.v1+json"));
             client.DefaultRequestHeaders.Add("Accept-Language", "pl-PL");
 
-            string apiUrl = "https://upload.allegro.pl.allegrosandbox.pl/sale/images";
-
-            if (!File.Exists(imagePath))
+            string fileExtension = Path.GetExtension(imagePath).ToLower();
+            string contentType = fileExtension switch
             {
-                Console.WriteLine($"Plik {imagePath} nie istnieje.");
+                ".png" => "image/png",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                _ => null
+            };
+
+            if (contentType == null)
+            {
+                Console.WriteLine("Nieobs³ugiwany format pliku. Dozwolone: PNG, JPG.");
                 return null;
             }
 
-            string file_upload_hash = GetFileHash(imagePath);
-
-            foreach (string ln in lines)
-            {
-                if (ln == file_upload_hash)
-                {
-                    Console.WriteLine("Plik jest ju¿ na serwerze");
-                    return null;
-                }
-            }
-
-            hash_content += $"\n{file_upload_hash}";
-            File.WriteAllText(hash_path, hash_content);
-
             byte[] imageBytes = await File.ReadAllBytesAsync(imagePath);
             ByteArrayContent byteContent = new ByteArrayContent(imageBytes);
-            byteContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+            byteContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
             HttpResponseMessage response = await client.PostAsync(apiUrl, byteContent);
             string responseString = await response.Content.ReadAsStringAsync();
@@ -317,15 +391,24 @@ internal class Program
             if (!response.IsSuccessStatusCode)
             {
                 Console.WriteLine($"B³¹d podczas przesy³ania obrazu: {response.StatusCode}");
+                Console.WriteLine($"Treœæ odpowiedzi: {responseString}");
                 return null;
             }
 
             JObject jsonResponse = JObject.Parse(responseString);
             string imageUrl = jsonResponse["location"]?.ToString();
 
+            if (string.IsNullOrEmpty(imageUrl))
+            {
+                Console.WriteLine("API nie zwróci³o poprawnego linku do obrazu.");
+                return null;
+            }
+
+            Console.WriteLine($"Przes³any obraz dostêpny pod adresem: {imageUrl}");
             return imageUrl;
         }
     }
+
     static async Task UpdateOfferImage(string accessToken, string oldImageUrl, string newImageUrl)
     {
         foreach(string offerId in lista_ofert)
@@ -450,4 +533,3 @@ internal class Program
         }
     }
 }
-
