@@ -16,78 +16,6 @@ https://a.allegroimg.allegrosandbox.pl/original/1127bb/4e4fca29413f8222ea7022608
 https://a.allegroimg.allegrosandbox.pl/original/11962e/7e74901446b8a001ca372d98d790 - ksi¹¿ka kolorowa
 - rakieta
 
-/*
-//Wgranie pliku na serwer
-string imagePath = "C:\\temp\\image37.png";
-string uploadedImageUrl = await UploadImageToAllegro(accessToken, imagePath);
-
-if (!string.IsNullOrEmpty(uploadedImageUrl))
-{
-    Console.WriteLine($"Przes³any obraz dostêpny pod adresem: {uploadedImageUrl}");
-}
-
-static async Task<string> UploadImageToAllegro(string accessToken, string imagePath)
-{
-    string hash_path = @"lista_hash.txt";
-    if (!File.Exists(hash_path))
-    {
-        Console.WriteLine("Plik lista_hash.txt nie istnieje.");
-        return null;
-    }
-
-    string[] lines = File.ReadAllLines(hash_path);
-    string hash_content = File.ReadAllText(hash_path);
-
-    using (HttpClient client = new HttpClient())
-    {
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.allegro.public.v1+json"));
-        client.DefaultRequestHeaders.Add("Accept-Language", "pl-PL");
-
-        string apiUrl = "https://upload.allegro.pl.allegrosandbox.pl/sale/images";
-
-        if (!File.Exists(imagePath))
-        {
-            Console.WriteLine($"Plik {imagePath} nie istnieje.");
-            return null;
-        }
-
-        string file_upload_hash = GetFileHash(imagePath);
-
-        foreach (string ln in lines)
-        {
-            if (ln == file_upload_hash)
-            {
-                Console.WriteLine("Plik jest ju¿ na serwerze");
-                return null;
-            }
-        }
-
-        hash_content += $"\n{file_upload_hash}";
-        File.WriteAllText(hash_path, hash_content);
-
-        byte[] imageBytes = await File.ReadAllBytesAsync(imagePath);
-        ByteArrayContent byteContent = new ByteArrayContent(imageBytes);
-        byteContent.Headers.ContentType = new MediaTypeHeaderValue("image/png");
-
-        HttpResponseMessage response = await client.PostAsync(apiUrl, byteContent);
-        string responseString = await response.Content.ReadAsStringAsync();
-
-        if (!response.IsSuccessStatusCode)
-        {
-            Console.WriteLine($"B³¹d podczas przesy³ania obrazu: {response.StatusCode}");
-            return null;
-        }
-
-        JObject jsonResponse = JObject.Parse(responseString);
-        string imageUrl = jsonResponse["location"]?.ToString();
-
-        return imageUrl;
-    }
-}
-*/
-
-
 using System;
 using System.ComponentModel;
 using System.Net.Http;
@@ -100,11 +28,29 @@ using System.Security.Cryptography;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Net;
+using System.Collections;
+using System.Xml.Linq;
+using System.Runtime.CompilerServices;
 internal class Program
 {
+    public static string[,] lista_plikow = new string[,]
+    {
+        {"\\Wzory1",""},
+        {"\\Wzory2",""},
+        {"\\Wzory3",""},
+        {"\\Wzory4",""},
+        {"\\Wzory5",""}
+    };
+
+    public static string folderPath = @"C:\Users\User\Desktop\Allegro\";
+
     public static List<string> lista_zdjec = new List<string>() { };
     public static List<string> lista_ofert = new List<string>() { };
-    
+    public static string[,] pliki = new string[5,2];
+    public static List<string> linki = new List<string>();
+    public static List<string> zdjecia = new List<string>();
+
+
     static async Task Main(string[] args)
     {
         string clientId = "d00446664cde499f88dbb0e745a73767";
@@ -112,6 +58,7 @@ internal class Program
         string redirectUri = "http://localhost:5000/callback/";
 
         string authUrl = $"https://allegro.pl.allegrosandbox.pl/auth/oauth/authorize?response_type=code&client_id={clientId}&redirect_uri={redirectUri}";
+
 
         Process.Start(new ProcessStartInfo
         {
@@ -131,42 +78,193 @@ internal class Program
             await GetOffers(accessToken, apiUrl);
         }
 
-        WypiszZdjecia();
+        //WypiszZdjecia();
 
-        /*
-        string oldImg = "";
-        string newImg = "";
+        string folder1 = "";
+        string folder2 = "";
 
-        Console.Write("\nPodaj stare zdjêcie: ");
-        oldImg = Console.ReadLine();
-        while (oldImg == "")
+        Console.Write("\nPodaj pierwszy parametr: ");
+        folder1 = Console.ReadLine();
+        while (folder1 == "")
         {
             Console.WriteLine("To pole nie mo¿e byæ puste!");
-            Console.Write("\nPodaj stare zdjêcie: ");
-            oldImg = Console.ReadLine();
+            Console.Write("\nPodaj pierwszy parametr: ");
+            folder1 = Console.ReadLine();
         }
+        folder1 = folderPath + folder1;
 
-        Console.Write("\nPodaj œcie¿kê do nowego zdjêcia: ");
-        newImg = Console.ReadLine();
-        while (newImg == "")
+        Console.Write("\nPodaj drugi parametr: ");
+        folder2 = Console.ReadLine();
+        while (folder2 == "")
         {
             Console.WriteLine("To pole nie mo¿e byæ puste!");
-            Console.Write("\nPodaj stare zdjêcie: ");
-            newImg = Console.ReadLine();
+            Console.Write("\nPodaj drugi parametr: ");
+            folder2 = Console.ReadLine();
         }
+        folder2 = folderPath + folder2;
 
-        string uploadedImageUrl = await UploadImageToAllegro(accessToken, newImg);
-
-        if (!string.IsNullOrEmpty(uploadedImageUrl))
+        if(CzyPoprawnyFolder1(folder1) == "B³¹d" || CzyPoprawnyFolder2(folder2) == "B³¹d")
         {
-            Console.WriteLine($"Przes³any obraz dostêpny pod adresem: {uploadedImageUrl}");
+            return;
+        }
+        
+        if(zdjecia.Count == 5 && linki.Count == 5)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                pliki[i, 0] = File.ReadAllText(linki.ElementAt(i));
+                pliki[i, 1] = zdjecia.ElementAt(i);
+            }
+        }
+        else
+        {
+            Console.WriteLine("Z³a struktura plików!");
+            return;
         }
 
-        await UpdateOfferImage(accessToken, oldImg, uploadedImageUrl);
-        */
+        for(int j = 0; j < 5; j++)
+        {
+            string uploadedImageUrl = await UploadImageToAllegro(accessToken, pliki[j, 1]);
+            if (!string.IsNullOrEmpty(uploadedImageUrl))
+            {
+                string path = folder2 + lista_plikow[j, 0] + ".txt";
+                File.WriteAllText(path, uploadedImageUrl);
+                Console.WriteLine($"Przes³any obraz dostêpny pod adresem: {uploadedImageUrl}");
+                await UpdateOfferImage(accessToken, pliki[j, 0], uploadedImageUrl);
+            }
+            else
+            {
+                Console.WriteLine("B³¹d przy zamianie zdjêæ!");
+                return;
+            }
+        }
+
+    }
+    
+    static string CzyPoprawnyFolder1(string path)
+    {
+        List<string> zdjecia = new List<string>();
+
+        bool isName;
+
+        if (!Directory.Exists(path))
+        {
+            Console.WriteLine($"Folder {path} nie istnieje.");
+            return "B³¹d";
+        }
+        string[] fileEntries = Directory.GetFiles(path);
+
+        foreach (string fileName in fileEntries)
+        {
+            if (fileName[fileName.Length - 3] == 't' && fileName[fileName.Length - 2] == 'x' && fileName[fileName.Length - 1] == 't')
+            {
+                linki.Add(fileName);
+            }
+            else if (fileName[fileName.Length - 3] == 'j' && fileName[fileName.Length - 2] == 'p' && fileName[fileName.Length - 1] == 'g')
+            {
+                zdjecia.Add(fileName);
+            }
+        }
+
+        foreach(string elem in zdjecia)
+        {
+            isName = false;
+            for (int i = 0; i < 5; i++)
+            {
+                if (elem == path + lista_plikow[i, 0] + ".jpg")
+                {
+                    lista_plikow[i, 1] = "1";
+                    isName= true;
+                }
+            }
+        }
+
+        for (int j = 0; j < 5; j++)
+        {
+            if (lista_plikow[j, 1] != "1")
+            {
+                Console.WriteLine("Nazwy zdjêæ w pierwszym folderze s¹ niepoprawne!");
+                return "B³¹d";
+            }
+            else
+            {
+                lista_plikow[j, 1] = "";
+            }
+        }
+
+        foreach (string elem in linki)
+        {
+            isName = false;
+            for (int i = 0; i < 5; i++)
+            {
+                if (elem == path + lista_plikow[i, 0] + ".txt")
+                {
+                    lista_plikow[i, 1] = "1";
+                    isName = true;
+                }
+            }
+        }
+
+        for (int j = 0; j < 5; j++)
+        {
+            if (lista_plikow[j, 1] != "1")
+            {
+                Console.WriteLine("Nazwy plików tekstowych w pierwszym folderze s¹ niepoprawne!");
+                return "B³¹d";
+            }
+            else
+            {
+                lista_plikow[j, 1] = "";
+            }
+        }
+
+
+        return "";
+    }
+    static string CzyPoprawnyFolder2(string path)
+    {
+        bool isName = false;
+
+        int plikiImg = 0;
+        if (!Directory.Exists(path))
+        {
+            Console.WriteLine($"Folder {path} nie istnieje.");
+            return "B³¹d";
+        }
+        string[] fileEntries = Directory.GetFiles(path);
+
+        foreach (string fileName in fileEntries)
+        {
+            zdjecia.Add(fileName);
+            isName = false;
+            for(int i = 0; i<5; i++)
+            {
+                if (fileName == path + lista_plikow[i, 0] + ".jpg")
+                {
+                    lista_plikow[i, 1] = "1";
+                    isName = true;
+                }
+            }       
+        }
+        
+        for(int j = 0; j < 5; j++)
+        {
+            if(lista_plikow[j, 1] != "1")
+            {
+                Console.WriteLine("Nazwy plików w drugim folderze s¹ niepoprawne!");
+                return "B³¹d";
+            }
+            else
+            {
+                lista_plikow[j, 1] = "";
+            }
+        }
+
+        return "";
     }
 
-    private static async Task<string> GetAuthorizationCode()
+
+    static async Task<string> GetAuthorizationCode()
     {
         var listener = new HttpListener();
         listener.Prefixes.Add("http://localhost:5000/callback/");
@@ -216,7 +314,7 @@ internal class Program
                         <h1>Autoryzacja pomyœlnie zrealizowana!</h1>
                         <p>Teraz mo¿esz zamkn¹æ to okno!</p>
                         <script>
-                            //setTimeout(() => { window.close(); }, 0);
+                            setTimeout(() => { window.close(); }, 0);
                         </script>
                     </div>
                 </body>
@@ -231,7 +329,7 @@ internal class Program
 
         return code;
     }
-    static async void WypiszZdjecia()
+    static void WypiszZdjecia()
     {
         foreach (string elem in lista_zdjec)
         {
@@ -404,7 +502,6 @@ internal class Program
                 return null;
             }
 
-            Console.WriteLine($"Przes³any obraz dostêpny pod adresem: {imageUrl}");
             return imageUrl;
         }
     }
@@ -507,7 +604,6 @@ internal class Program
                 }
 
                 string requestBody = offerData.ToString(Formatting.Indented);
-                //Console.WriteLine("Wysy³ane dane do API:\n" + requestBody);
 
                 StringContent content = new StringContent(requestBody, Encoding.UTF8, "application/vnd.allegro.public.v1+json");
                 HttpResponseMessage putResponse = await client.PutAsync(apiUrl, content);
