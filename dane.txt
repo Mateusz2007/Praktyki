@@ -42,7 +42,7 @@ internal class Program
         {"\\Wzory5",""}
     };
 
-    public static string folderPath = @"C:\Users\User\Desktop\Allegro\";
+    public static string folderPath = "Allegro\\";
 
     public static List<string> lista_zdjec = new List<string>() { };
     public static List<string> lista_ofert = new List<string>() { };
@@ -80,31 +80,56 @@ internal class Program
 
         //WypiszZdjecia();
 
+        string temp = "";
         string folder1 = "";
         string folder2 = "";
 
-        Console.Write("\nPodaj pierwszy parametr: ");
+        Console.Write("\nPodaj folder nadrzêdny (domyœlnie Allegro): ");
+        temp = Console.ReadLine();
+        if(temp != "")
+        {
+            folderPath = temp;
+        }
+
+        if (!Directory.Exists(folderPath))
+        {
+            Console.WriteLine($"\nFolder {folderPath} nie istnieje.");
+            Console.ReadLine();
+            return;
+        }
+
+        folderPath += "\\";
+
+        Console.Write("\nPodaj pierwszy parametr (Folder z obecnymi zdjêciami): ");
         folder1 = Console.ReadLine();
         while (folder1 == "")
         {
             Console.WriteLine("To pole nie mo¿e byæ puste!");
-            Console.Write("\nPodaj pierwszy parametr: ");
+            Console.Write("\nPodaj pierwszy parametr (Folder z obecnymi zdjêciami): ");
             folder1 = Console.ReadLine();
         }
         folder1 = folderPath + folder1;
 
-        Console.Write("\nPodaj drugi parametr: ");
+        Console.Write("\nPodaj drugi parametr (Folder z nowymi zdjêciami): ");
         folder2 = Console.ReadLine();
         while (folder2 == "")
         {
             Console.WriteLine("To pole nie mo¿e byæ puste!");
-            Console.Write("\nPodaj drugi parametr: ");
+            Console.Write("\nPodaj drugi parametr (Folder z nowymi zdjêciami): ");
             folder2 = Console.ReadLine();
         }
         folder2 = folderPath + folder2;
 
-        if(CzyPoprawnyFolder1(folder1) == "B³¹d" || CzyPoprawnyFolder2(folder2) == "B³¹d")
+        if(CzyPoprawnyFolder1(folder1) == "error" || CzyPoprawnyFolder2(folder2) == "error")
         {
+            Console.ReadLine();
+            return;
+        }
+
+        if(folder1 == folder2)
+        {
+            Console.WriteLine("\nParametry nie mog¹ byæ takie same!");
+            Console.ReadLine();
             return;
         }
         
@@ -118,7 +143,8 @@ internal class Program
         }
         else
         {
-            Console.WriteLine("Z³a struktura plików!");
+            Console.WriteLine("\nZ³a struktura plików!");
+            Console.ReadLine();
             return;
         }
 
@@ -129,15 +155,20 @@ internal class Program
             {
                 string path = folder2 + lista_plikow[j, 0] + ".txt";
                 File.WriteAllText(path, uploadedImageUrl);
-                Console.WriteLine($"Przes³any obraz dostêpny pod adresem: {uploadedImageUrl}");
+                Console.WriteLine($"\nPrzes³any obraz pod adresem: {uploadedImageUrl}");
                 await UpdateOfferImage(accessToken, pliki[j, 0], uploadedImageUrl);
             }
             else
             {
-                Console.WriteLine("B³¹d przy zamianie zdjêæ!");
+                Console.WriteLine("\nB³¹d przy zamianie zdjêæ!");
+                Console.ReadLine();
                 return;
             }
         }
+
+        Console.WriteLine("\nPomyœlnie wykonano!");
+        Console.ReadLine();
+        return;
 
     }
     
@@ -145,13 +176,12 @@ internal class Program
     {
         List<string> zdjecia = new List<string>();
 
-        bool isName;
-
         if (!Directory.Exists(path))
         {
-            Console.WriteLine($"Folder {path} nie istnieje.");
-            return "B³¹d";
+            Console.WriteLine($"\nFolder {path} nie istnieje.");
+            return "error";
         }
+
         string[] fileEntries = Directory.GetFiles(path);
 
         foreach (string fileName in fileEntries)
@@ -168,13 +198,11 @@ internal class Program
 
         foreach(string elem in zdjecia)
         {
-            isName = false;
             for (int i = 0; i < 5; i++)
             {
                 if (elem == path + lista_plikow[i, 0] + ".jpg")
                 {
                     lista_plikow[i, 1] = "1";
-                    isName= true;
                 }
             }
         }
@@ -183,8 +211,8 @@ internal class Program
         {
             if (lista_plikow[j, 1] != "1")
             {
-                Console.WriteLine("Nazwy zdjêæ w pierwszym folderze s¹ niepoprawne!");
-                return "B³¹d";
+                Console.WriteLine("\nNazwy zdjêæ w pierwszym folderze s¹ niepoprawne!");
+                return "error";
             }
             else
             {
@@ -194,13 +222,11 @@ internal class Program
 
         foreach (string elem in linki)
         {
-            isName = false;
             for (int i = 0; i < 5; i++)
             {
                 if (elem == path + lista_plikow[i, 0] + ".txt")
                 {
                     lista_plikow[i, 1] = "1";
-                    isName = true;
                 }
             }
         }
@@ -209,8 +235,8 @@ internal class Program
         {
             if (lista_plikow[j, 1] != "1")
             {
-                Console.WriteLine("Nazwy plików tekstowych w pierwszym folderze s¹ niepoprawne!");
-                return "B³¹d";
+                Console.WriteLine("\nNazwy plików tekstowych w pierwszym folderze s¹ niepoprawne!");
+                return "error";
             }
             else
             {
@@ -218,41 +244,39 @@ internal class Program
             }
         }
 
-
         return "";
     }
     static string CzyPoprawnyFolder2(string path)
     {
-        bool isName = false;
-
         int plikiImg = 0;
         if (!Directory.Exists(path))
         {
-            Console.WriteLine($"Folder {path} nie istnieje.");
-            return "B³¹d";
+            Console.WriteLine($"\nFolder {path} nie istnieje.");
+            return "error";
         }
         string[] fileEntries = Directory.GetFiles(path);
 
         foreach (string fileName in fileEntries)
         {
-            zdjecia.Add(fileName);
-            isName = false;
-            for(int i = 0; i<5; i++)
+            if (fileName[fileName.Length-3] == 'j' && fileName[fileName.Length-2] == 'p' && fileName[fileName.Length-1] == 'g')
             {
-                if (fileName == path + lista_plikow[i, 0] + ".jpg")
+                zdjecia.Add(fileName);
+                for (int i = 0; i < 5; i++)
                 {
-                    lista_plikow[i, 1] = "1";
-                    isName = true;
+                    if (fileName == path + lista_plikow[i, 0] + ".jpg")
+                    {
+                        lista_plikow[i, 1] = "1";
+                    }
                 }
-            }       
+            }     
         }
         
         for(int j = 0; j < 5; j++)
         {
             if(lista_plikow[j, 1] != "1")
             {
-                Console.WriteLine("Nazwy plików w drugim folderze s¹ niepoprawne!");
-                return "B³¹d";
+                Console.WriteLine("\nNazwy plików w drugim folderze s¹ niepoprawne!");
+                return "error";
             }
             else
             {
