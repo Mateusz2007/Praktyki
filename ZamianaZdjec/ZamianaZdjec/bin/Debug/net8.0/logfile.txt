@@ -1,0 +1,8 @@
+2025-03-05 13:39:02,032 [7] ERROR Program - W oferie (7777202910) nie wykonano akcji! : Nowy obraz nie może zostać zamieniony, ponieważ istnieje już w ofercie! W ofercie nie ma obrazu do zamiany!
+2025-03-05 13:39:06,177 [5] ERROR Program - W oferie (7777202910) nie wykonano akcji! : Nowy obraz nie może zostać zamieniony, ponieważ istnieje już w ofercie! W ofercie nie ma obrazu do zamiany!
+2025-03-05 13:39:09,505 [7] ERROR Program - W oferie (7777202910) nie wykonano akcji! : Nowy obraz nie może zostać zamieniony, ponieważ istnieje już w ofercie! W ofercie nie ma obrazu do zamiany!
+2025-03-05 13:39:12,399 [7] ERROR Program - W oferie (7777202910) nie wykonano akcji! : Nowy obraz nie może zostać zamieniony, ponieważ istnieje już w ofercie! W ofercie nie ma obrazu do zamiany!
+2025-03-05 13:39:14,788 [5] ERROR Program - W oferie (7777202910) nie wykonano akcji! : Nowy obraz nie może zostać zamieniony, ponieważ istnieje już w ofercie! W ofercie nie ma obrazu do zamiany!
+2025-03-05 13:39:15,860 [9] ERROR Program - Wykonano z błędami!
+2025-03-05 13:53:04,573 [7] ERROR Program - Nazwy zdjęć w pierwszym folderze są niepoprawne!
+2025-03-05 14:05:41,145 [7] ERROR Program - Folder Allegro\\dasdsdfs nie istnieje!
