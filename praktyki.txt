@@ -1,0 +1,18 @@
+Pn 17.02.2025r. Zapoznanie z BHP. Tworzenie aplikacji konsolowych w C# wykorzystujących zapis i odczyt z plików tekstowych, edycja plików tekstowych, zapis i odczyt plików csv, połączenie przez api w celu pobierania aktualnego kursu waluty. Stworzenie aplikacji odczytującej dane z pliku Excel za pomocą biblioteki NPOI.
+Wt 18.02.2025r. Rozpoczęcie pracy z technologią ASP.NET Core MVC. Połaczenie apliakcji z bazą danych PostgreSQL.
+Śr 19.02.2025r. Ukończenie projektu aplikacji internetowej do zarządzania klientami z możliwością dodawania, usuwania i edycji klienta oraz importu i eksportu danych z bazy danych. Ostylowanie aplikacji za pomocą Bootstrap'a.
+Cz 20.02.2025r. Rozpoczęcie pracy w środowisku allegro sandbox.
+Pt 21.02.2025r. Połaczenie aplikacji konsolowej z allegro sandbox przez API.
+
+Pn 24.02.2025r. Rozwiązywanie problemów z tokenem dostępu.
+Wt 25.02.2025r. Tworzenie funkcji pobierającej listę zdjęć z ofert allegro.
+Śr 26.02.2025r. Tworzenie funkcji wgrywającej nowe zdjęcia z pliku na serwer allegro.
+Cz 27.02.2025r. Tworzenie funkcji do aktualizacji ofert.
+Pt 28.02.2025r. Tworzenie pobierania danych od użytkownika w celu zmiany zdjęć w ofertach.
+
+Pn 03.03.2025r. Zmiana funkcji pobierania tokenu dostępu, tak aby wykonywana ona była automatycznie przez program bez konieczności ręcznego kopiowania linku i szukania tokenu.
+Wt 04.03.2025r. Połączenie aplikacji ze strukturą folderów i plików z których program ma pobierać pliki. Zabezpieczenie aplikacji przed wyjątkami i niepoprawnym użytkowaniem aplikacji przez użytkownika.
+Śr 05.03.2025r. Dodanie technologii log4net do zapisu logów. Dodanie pliku konfiguracyjnego do przechowywania danych dostępu do allegro sandbox.
+Cz 06.03.2025r. 
+Pt 07.03.2025r. 
+
