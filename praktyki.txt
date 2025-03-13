@@ -13,6 +13,12 @@ Pt 28.02.2025r. Tworzenie pobierania danych od użytkownika w celu zmiany zdję�
 Pn 03.03.2025r. Zmiana funkcji pobierania tokenu dostępu, tak aby wykonywana ona była automatycznie przez program bez konieczności ręcznego kopiowania linku i szukania tokenu.
 Wt 04.03.2025r. Połączenie aplikacji ze strukturą folderów i plików z których program ma pobierać pliki. Zabezpieczenie aplikacji przed wyjątkami i niepoprawnym użytkowaniem aplikacji przez użytkownika.
 Śr 05.03.2025r. Dodanie technologii log4net do zapisu logów. Dodanie pliku konfiguracyjnego do przechowywania danych dostępu do allegro sandbox.
-Cz 06.03.2025r. 
-Pt 07.03.2025r. 
+Cz 06.03.2025r. Rozpoczęcie pracy na pełnoskalowym systemie do administrowania sprzedażą firmy. Poznanie repository pattern, onion architekture, IoC container, dapper, ORM.
+Pt 07.03.2025r. Rozpoczęcie praktyczniej pracy z projektem. Zapoznanie ze struktórą tego typu projektów. Analiza istniejących plików, rozwiązań i podstawowych mechanik.
+
+Pn 10.03.2025r.
+Wt 11.03.2025r.
+Śr 12.03.2025r.
+Cz 13.03.2025r.
+Pt 14.03.2025r.
 
